@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adivina la Bandera</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Fondo con gradiente radial continuo */
+    body {
+      background: radial-gradient(circle, #0088ff 0%, #0055d4 40%, #003399 85%, #001f66 100%);
+      font-family: 'Fredoka', 'Montserrat', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Tarjeta de bandera estática */
+    .flag-card {
+      background: white;
+      padding: 12px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Animaciones */
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-pop {
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen w-screen overflow-hidden select-none">
+
+  <!-- ================= PANTALLA 1: INICIO ================= -->
+  <section id="screen-start" class="screen active flex-col items-center justify-center text-center p-4 space-y-6 animate-pop">
+    <h1 class="text-5xl md:text-7xl font-black text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] tracking-wide">
+      ADIVINA LA BANDERA
+    </h1>
+
+    <button onclick="playBtnSound(); goToScreen('screen-rules')" class="bg-yellow-400 hover:bg-yellow-300 text-blue-950 text-2xl md:text-3xl font-black py-4 px-12 rounded-full shadow-[0_6px_0_#b38600] hover:shadow-[0_2px_0_#b38600] hover:translate-y-1 transition-all cursor-pointer">
+      JUGAR
+    </button>
+  </section>
+
+  <!-- ================= PANTALLA 2: REGLAS ================= -->
+  <section id="screen-rules" class="screen flex-col items-center justify-center p-4 animate-pop">
+    <div class="bg-blue-900/80 backdrop-blur-md border-4 border-white/30 rounded-3xl p-6 md:p-8 max-w-xl w-full text-center space-y-6 shadow-2xl">
+      <h2 class="text-3xl font-black text-yellow-400 tracking-wide uppercase border-b-2 border-white/20 pb-3">
+        Reglas del Juego
+      </h2>
+
+      <div class="space-y-4 text-lg md:text-xl font-bold text-left">
+        <div class="flex items-center space-x-3">
+          <span class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white text-lg">1</span>
+          <p>Observa la bandera y piensa la respuesta antes de que se agote el tiempo.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white text-lg">2</span>
+          <p>Las banderas irán aumentando de dificultad: <span class="text-emerald-300">Fácil (15s)</span>, <span class="text-yellow-300">Medio (10s)</span> y <span class="text-red-400">Difícil (5s)</span>.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white text-lg">3</span>
+          <p>Al agotarse el tiempo, presiona Mostrar Respuesta para comprobar y continuar.</p>
+        </div>
+      </div>
+
+      <button onclick="playBtnSound(); startGame()" class="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-2xl font-black py-3 rounded-2xl shadow-[0_5px_0_#059669] hover:translate-y-1 transition-all cursor-pointer">
+        EMPEZAR
+      </button>
+    </div>
+  </section>
+
+  <!-- ================= PANTALLA 3: JUEGO ================= -->
+  <section id="screen-game" class="screen flex-col justify-between items-center p-4 md:p-6 relative">
+    
+    <!-- CÍRCULO CON EL NÚMERO DE BANDERA -->
+    <div class="absolute top-4 left-4 md:top-6 md:left-6 z-10">
+      <div id="flag-number" class="w-14 h-14 md:w-16 md:h-16 bg-red-600 border-4 border-white rounded-full flex items-center justify-center text-white text-2xl md:text-3xl font-black shadow-lg">
+        1
+      </div>
+    </div>
+
+    <!-- TÍTULO SUPERIOR Y DIFICULTAD -->
+    <div class="text-center mt-1 space-y-1">
+      <h2 class="text-2xl md:text-4xl font-black tracking-wide text-white drop-shadow-[0_3px_6px_rgba(0,0,0,0.6)]">
+        Adivina Todos los Países
+      </h2>
+      <span id="difficulty-badge" class="inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-emerald-500 border border-white/40 shadow-sm">
+        DIFICULTAD: FACIL
+      </span>
+    </div>
+
+    <!-- CONTENEDOR CENTRAL: BANDERA + ACCIONES -->
+    <div class="w-full max-w-3xl flex flex-col items-center my-auto space-y-4">
+      
+      <!-- LA BANDERA -->
+      <div class="flag-card w-full max-w-2xl h-[260px] md:h-[340px] flex items-center justify-center overflow-hidden">
+        <img id="flag-image" src="" alt="Bandera" class="w-full h-full object-contain rounded-xl">
+      </div>
+
+      <!-- SECCIÓN DEL TEMPORIZADOR Y BARRA DE TIEMPO -->
+      <div id="timer-container" class="w-full max-w-2xl space-y-1">
+        <div class="flex justify-between items-center px-1">
+          <span class="text-sm font-bold text-blue-200 uppercase tracking-wider">Tiempo Restante</span>
+          <span id="timer-text" class="text-xl font-black text-yellow-300">15s</span>
+        </div>
+        <div class="w-full bg-white/30 h-6 rounded-full p-1 border-2 border-white shadow-inner overflow-hidden">
+          <div id="time-bar" class="bg-emerald-400 h-full rounded-full transition-all duration-1000 ease-linear w-full"></div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE ACCIÓN -->
+      <div id="action-area" class="w-full max-w-xl flex flex-col items-center space-y-3">
+        
+        <!-- BOTÓN "MOSTRAR RESPUESTA" -->
+        <button id="reveal-btn" onclick="playBtnSound(); revealAnswer()" class="hidden w-full max-w-md bg-yellow-400 hover:bg-yellow-300 text-blue-950 font-black text-xl py-3 rounded-2xl shadow-[0_5px_0_#b38600] hover:translate-y-1 transition-all cursor-pointer animate-pop">
+          MOSTRAR RESPUESTA
+        </button>
+
+        <!-- TARJETA CON EL NOMBRE DEL PAÍS -->
+        <div id="answer-box" class="hidden w-full text-center bg-emerald-500 text-white font-black text-2xl md:text-3xl py-2.5 px-6 rounded-2xl border-4 border-white shadow-2xl animate-pop">
+          <span id="country-name"></span>
+        </div>
+
+        <!-- BOTÓN "SIGUIENTE" -->
+        <button id="next-btn" onclick="playBtnSound(); nextFlag()" class="hidden w-full max-w-md bg-blue-500 hover:bg-blue-400 text-white font-black text-xl py-3 rounded-2xl border-2 border-white shadow-[0_5px_0_#1d4ed8] hover:translate-y-1 transition-all cursor-pointer animate-pop">
+          SIGUIENTE
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="h-2"></div>
+
+  </section>
+
+  <script>
+    // =========================================================================
+    // SISTEMA DE SONIDOS SINTETIZADOS (Web Audio API)
+    // =========================================================================
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playBtnSound() {
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    function playTickSound() {
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function playTimeUpSound() {
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+
+    // =========================================================================
+    // CONFIGURACIÓN DE BANDERAS (CARGADAS DESDE FLAGCDN)
+    // =========================================================================
+    const flagsList = [
+      { country: "Portugal", imageFile: "https://flagcdn.com/pt.svg", difficulty: "facil" },
+      { country: "Turquía", imageFile: "https://flagcdn.com/tr.svg", difficulty: "facil" },
+      { country: "Grecia", imageFile: "https://flagcdn.com/gr.svg", difficulty: "facil" },
+      { country: "Sudáfrica", imageFile: "https://flagcdn.com/za.svg", difficulty: "facil" },
+      { country: "Croacia", imageFile: "https://flagcdn.com/hr.svg", difficulty: "facil" },
+      { country: "India", imageFile: "https://flagcdn.com/in.svg", difficulty: "facil" },
+      { country: "Serbia", imageFile: "https://flagcdn.com/rs.svg", difficulty: "facil" },
+
+      { country: "Vietnam", imageFile: "https://flagcdn.com/vn.svg", difficulty: "medio" },
+      { country: "Filipinas", imageFile: "https://flagcdn.com/ph.svg", difficulty: "medio" },
+      { country: "Eslovaquia", imageFile: "https://flagcdn.com/sk.svg", difficulty: "medio" },
+      { country: "Eslovenia", imageFile: "https://flagcdn.com/si.svg", difficulty: "medio" },
+      { country: "Lituania", imageFile: "https://flagcdn.com/lt.svg", difficulty: "medio" },
+      { country: "Letonia", imageFile: "https://flagcdn.com/lv.svg", difficulty: "medio" },
+      { country: "Georgia", imageFile: "https://flagcdn.com/ge.svg", difficulty: "medio" },
+
+      { country: "Rumania", imageFile: "https://flagcdn.com/ro.svg", difficulty: "dificil" },
+      { country: "Chad", imageFile: "https://flagcdn.com/td.svg", difficulty: "dificil" },
+      { country: "Moldavia", imageFile: "https://flagcdn.com/md.svg", difficulty: "dificil" },
+      { country: "Kirguistán", imageFile: "https://flagcdn.com/kg.svg", difficulty: "dificil" },
+      { country: "Turkmenistán", imageFile: "https://flagcdn.com/tm.svg", difficulty: "dificil" },
+      { country: "Bután", imageFile: "https://flagcdn.com/bt.svg", difficulty: "dificil" },
+      { country: "Seychelles", imageFile: "https://flagcdn.com/sc.svg", difficulty: "dificil" }
+    ];
+
+    let currentIndex = 0;
+    let maxTime = 15;
+    let timeLeft = 15;
+    let timerInterval = null;
+
+    function goToScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function startGame() {
+      goToScreen('screen-game');
+      currentIndex = 0;
+      loadFlag(currentIndex);
+    }
+
+    function loadFlag(index) {
+      const currentFlag = flagsList[index];
+
+      if (currentFlag.difficulty === "facil") maxTime = 15;
+      else if (currentFlag.difficulty === "medio") maxTime = 10;
+      else if (currentFlag.difficulty === "dificil") maxTime = 5;
+
+      const badge = document.getElementById('difficulty-badge');
+      badge.innerText = `DIFICULTAD: ${currentFlag.difficulty.toUpperCase()}`;
+      
+      if (currentFlag.difficulty === "facil") {
+        badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-emerald-500 border border-white/40 shadow-sm";
+      } else if (currentFlag.difficulty === "medio") {
+        badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-yellow-500 border border-white/40 shadow-sm";
+      } else {
+        badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-red-500 border border-white/40 shadow-sm";
+      }
+
+      document.getElementById('timer-container').classList.remove('hidden');
+      document.getElementById('reveal-btn').classList.add('hidden');
+      document.getElementById('answer-box').classList.add('hidden');
+      document.getElementById('next-btn').classList.add('hidden');
+
+      document.getElementById('flag-number').innerText = index + 1;
+      document.getElementById('flag-image').src = currentFlag.imageFile;
+      document.getElementById('country-name').innerText = currentFlag.country;
+
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = maxTime;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+
+        if (timeLeft > 0) {
+          playTickSound();
+        } else {
+          clearInterval(timerInterval);
+          playTimeUpSound();
+          showRevealButton();
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      document.getElementById('timer-text').innerText = `${timeLeft}s`;
+      const percentage = (timeLeft / maxTime) * 100;
+      const bar = document.getElementById('time-bar');
+      bar.style.width = `${percentage}%`;
+
+      if (timeLeft <= 3) {
+        bar.className = "bg-red-500 h-full rounded-full transition-all duration-1000 ease-linear";
+      } else {
+        bar.className = "bg-emerald-400 h-full rounded-full transition-all duration-1000 ease-linear";
+      }
+    }
+
+    function showRevealButton() {
+      document.getElementById('timer-container').classList.add('hidden');
+      document.getElementById('reveal-btn').classList.remove('hidden');
+    }
+
+    function revealAnswer() {
+      document.getElementById('reveal-btn').classList.add('hidden');
+      document.getElementById('answer-box').classList.remove('hidden');
+      
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.classList.remove('hidden');
+
+      if (currentIndex === flagsList.length - 1) {
+        nextBtn.innerText = "VOLVER AL INICIO";
+      } else {
+        nextBtn.innerText = "SIGUIENTE";
+      }
+    }
+
+    function nextFlag() {
+      if (currentIndex < flagsList.length - 1) {
+        currentIndex++;
+        loadFlag(currentIndex);
+      } else {
+        goToScreen('screen-start');
+      }
+    }
+  </script>
+</body>
+</html>
