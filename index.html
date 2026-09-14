@@ -68,7 +68,7 @@
         </div>
         <div class="flex items-center space-x-3">
           <span class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white text-lg">2</span>
-          <p>Las banderas irán aumentando de dificultad: <span class="text-emerald-300">Fácil</span>, <span class="text-yellow-300">Medio</span> y <span class="text-red-400">Difícil</span>.</p>
+          <p>Las banderas irán aumentando de dificultad: <span class="text-emerald-300">Fácil</span>, <span class="text-yellow-300">Medio</span>, <span class="text-orange-300">Difícil</span> y <span class="text-red-400">Extremo</span>.</p>
         </div>
         <div class="flex items-center space-x-3">
           <span class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white text-lg">3</span>
@@ -98,7 +98,7 @@
         Adivina Todos los Países
       </h2>
       <span id="difficulty-badge" class="inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-emerald-500 border border-white/40 shadow-sm">
-        DIFICULTAD: FACIL
+        DIFICULTAD: FÁCIL
       </span>
     </div>
 
@@ -225,29 +225,29 @@
     // CONFIGURACIÓN DE BANDERAS (CARGADAS DESDE FLAGCDN)
     // =========================================================================
     const flagsList = [
-      { country: "Portugal", imageFile: "https://flagcdn.com/pt.svg", difficulty: "facil" },
-      { country: "Turquía", imageFile: "https://flagcdn.com/tr.svg", difficulty: "facil" },
-      { country: "Grecia", imageFile: "https://flagcdn.com/gr.svg", difficulty: "facil" },
-      { country: "Sudáfrica", imageFile: "https://flagcdn.com/za.svg", difficulty: "facil" },
-      { country: "Croacia", imageFile: "https://flagcdn.com/hr.svg", difficulty: "facil" },
-      { country: "India", imageFile: "https://flagcdn.com/in.svg", difficulty: "facil" },
-      { country: "Serbia", imageFile: "https://flagcdn.com/rs.svg", difficulty: "facil" },
+      { country: "Japón", imageFile: "https://flagcdn.com/jp.svg", difficulty: "facil" },
+      { country: "Canadá", imageFile: "https://flagcdn.com/ca.svg", difficulty: "facil" },
+      { country: "Brasil", imageFile: "https://flagcdn.com/br.svg", difficulty: "facil" },
+      { country: "Francia", imageFile: "https://flagcdn.com/fr.svg", difficulty: "facil" },
+      { country: "Italia", imageFile: "https://flagcdn.com/it.svg", difficulty: "facil" },
 
-      { country: "Vietnam", imageFile: "https://flagcdn.com/vn.svg", difficulty: "medio" },
-      { country: "Filipinas", imageFile: "https://flagcdn.com/ph.svg", difficulty: "medio" },
-      { country: "Eslovaquia", imageFile: "https://flagcdn.com/sk.svg", difficulty: "medio" },
-      { country: "Eslovenia", imageFile: "https://flagcdn.com/si.svg", difficulty: "medio" },
-      { country: "Lituania", imageFile: "https://flagcdn.com/lt.svg", difficulty: "medio" },
-      { country: "Letonia", imageFile: "https://flagcdn.com/lv.svg", difficulty: "medio" },
-      { country: "Georgia", imageFile: "https://flagcdn.com/ge.svg", difficulty: "medio" },
+      { country: "Turquía", imageFile: "https://flagcdn.com/tr.svg", difficulty: "medio" },
+      { country: "Grecia", imageFile: "https://flagcdn.com/gr.svg", difficulty: "medio" },
+      { country: "Sudáfrica", imageFile: "https://flagcdn.com/za.svg", difficulty: "medio" },
+      { country: "Croacia", imageFile: "https://flagcdn.com/hr.svg", difficulty: "medio" },
+      { country: "India", imageFile: "https://flagcdn.com/in.svg", difficulty: "medio" },
 
-      { country: "Rumania", imageFile: "https://flagcdn.com/ro.svg", difficulty: "dificil" },
-      { country: "Chad", imageFile: "https://flagcdn.com/td.svg", difficulty: "dificil" },
-      { country: "Moldavia", imageFile: "https://flagcdn.com/md.svg", difficulty: "dificil" },
-      { country: "Kirguistán", imageFile: "https://flagcdn.com/kg.svg", difficulty: "dificil" },
-      { country: "Turkmenistán", imageFile: "https://flagcdn.com/tm.svg", difficulty: "dificil" },
-      { country: "Bután", imageFile: "https://flagcdn.com/bt.svg", difficulty: "dificil" },
-      { country: "Seychelles", imageFile: "https://flagcdn.com/sc.svg", difficulty: "dificil" }
+      { country: "Vietnam", imageFile: "https://flagcdn.com/vn.svg", difficulty: "dificil" },
+      { country: "Filipinas", imageFile: "https://flagcdn.com/ph.svg", difficulty: "dificil" },
+      { country: "Eslovaquia", imageFile: "https://flagcdn.com/sk.svg", difficulty: "dificil" },
+      { country: "Lituania", imageFile: "https://flagcdn.com/lt.svg", difficulty: "dificil" },
+      { country: "Georgia", imageFile: "https://flagcdn.com/ge.svg", difficulty: "dificil" },
+
+      { country: "Chad", imageFile: "https://flagcdn.com/td.svg", difficulty: "extremo" },
+      { country: "Moldavia", imageFile: "https://flagcdn.com/md.svg", difficulty: "extremo" },
+      { country: "Kirguistán", imageFile: "https://flagcdn.com/kg.svg", difficulty: "extremo" },
+      { country: "Turkmenistán", imageFile: "https://flagcdn.com/tm.svg", difficulty: "extremo" },
+      { country: "Bután", imageFile: "https://flagcdn.com/bt.svg", difficulty: "extremo" }
     ];
 
     let currentIndex = 0;
@@ -272,14 +272,19 @@
       if (currentFlag.difficulty === "facil") maxTime = 15;
       else if (currentFlag.difficulty === "medio") maxTime = 15;
       else if (currentFlag.difficulty === "dificil") maxTime = 15;
+      else if (currentFlag.difficulty === "extremo") maxTime = 15;
 
       const badge = document.getElementById('difficulty-badge');
-      badge.innerText = `DIFICULTAD: ${currentFlag.difficulty.toUpperCase()}`;
-      
-      if (currentFlag.difficulty === "facil") {
+      badge.innerText = currentFlag.difficulty === "muy facil"
+        ? "DIFICULTAD: MUY FÁCIL"
+        : `DIFICULTAD: ${currentFlag.difficulty.toUpperCase()}`;
+
+      if (currentFlag.difficulty === "muy facil") {
         badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-emerald-500 border border-white/40 shadow-sm";
       } else if (currentFlag.difficulty === "medio") {
         badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-yellow-500 border border-white/40 shadow-sm";
+      } else if (currentFlag.difficulty === "dificil") {
+        badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-orange-500 border border-white/40 shadow-sm";
       } else {
         badge.className = "inline-block px-4 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-widest bg-red-500 border border-white/40 shadow-sm";
       }
